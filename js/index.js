@@ -60,6 +60,11 @@ In this case, the message queue contains one callback, and the call stack is emp
 
 After that the console.log(‘Async Code’) is pushed to the top of the stack, executed and popped off from the stack. At this point, the callback has finished so it’s removed from the stack and the program finally finishes.
 
+What is a Callback?
+
+Simply put: A callback is a function that is to be executed after another function has finished executing — hence the name ‘call back’.
+
+More complexly put: In JavaScript, functions are objects. Because of this, functions can take functions as arguments, and can be returned by other functions. Functions that do this are called higher-order functions. Any function that is passed as an argument is called a callback function.
 **********/
 var assincrono = function assincrono() {
   var funcao2 = function funcao2() {
