@@ -1,0 +1,116 @@
+const print = (mensagem, isTitulo) => {
+  let adiciona = (elemento) => { document.body.appendChild(elemento); };
+  let texto = () => { return document.createTextNode("> " + mensagem); };
+  let titulo = () => { return document.createTextNode("##### " + mensagem); };
+  let quebra = () => { return document.createElement("br"); };
+ 
+  if (isTitulo) 
+    adiciona(titulo());
+  else 
+    adiciona(texto()); 
+  
+  adiciona(quebra());
+};
+
+
+/**********
+Chamadas síncronas
+As funções são adicionadas ao call stack e executadas last in, first out;
+Caso uma das funções demore para retornar, todas as outras ficam paradas, 
+aguardando sua saída do stack.
+
+É o padrão do javascript, que trabalha com single thread.
+
+**********/
+const sincrono = () => {
+  const funcao2 = () => {
+    print("Função 2: executando e saindo da segunda função (last in, first out)");
+  }
+
+  const funcao1 = () => {
+    print("Função 1: chamando segunda função (adicionando ao call stack)");
+    funcao2();
+    print("Função 1: saindo da primeira função");
+  }
+
+  print("FUNÇÕES SÍNCRONAS", true);
+  funcao1();
+};
+//sincrono();
+
+
+/**********
+Chamadas assíncronas
+Numa chamada assíncrona, você passa uma função como parâmetro de callback, que será executada no retorno da função principal.
+Por exemplo, a função setTimeout recebe um callback e o tempo (em milesegundos) que vai demorar pra retornar
+
+Nesse caso, a primeira função é adicionada
+
+When the above code loads in the browser, the console.log(‘Hello World’) is pushed to the stack and popped off the stack after it’s finished. Next, a call to networkRequest() is encountered, so it’s pushed to the top of the stack.
+
+Next setTimeout() function is called, so it’s pushed to the top of the stack. The setTimeout() has two arguments: 1) callback and 2) time in milliseconds (ms).
+
+The setTimeout() method starts a timer of 2s in the web APIs environment. At this point, the setTimeout() has finished and it’s popped off from the stack. After it, console.log('The End') is pushed to the stack, executed and removed from the stack after its completion.
+
+Meanwhile, the timer has expired, now the callback is pushed to the message queue. But the callback is not immediately executed, and that’s where the event loop kicks in.
+
+The job of the Event loop is to look into the call stack and determine if the call stack is empty or not. If the call stack is empty, it looks into the message queue to see if there’s any pending callback waiting to be executed.
+
+In this case, the message queue contains one callback, and the call stack is empty at this point. So the Event loop pushes the callback to the top of the stack.
+
+After that the console.log(‘Async Code’) is pushed to the top of the stack, executed and popped off from the stack. At this point, the callback has finished so it’s removed from the stack and the program finally finishes.
+
+**********/
+const assincrono = () => {
+  const funcao2 = () => {
+    setTimeout(() => {
+        print("Função 2: executando e saindo da segunda função");
+      }, 2000);
+  };
+
+  const funcao1 = () => {
+    print("Função 1: chamando segunda função via callback. ela será adicionada ao message queue para ser executada apenas quando o call stack estiver vazio");
+    funcao2();
+    print("Função 1: saindo da primeira função (liberando o call stack)");
+  }
+
+  print("FUNÇÕES ASSÍNCRONAS", true);
+  funcao1();
+  
+};
+//assincrono(); 
+
+
+/**
+Promessas
+ES6 Job Queue
+
+We have learned how the asynchronous callbacks and DOM events are executed which uses the message queue to store all the callbacks waiting to be executed.
+
+ES6 introduced the concept of job queue which is used by Promises in JavaScript. The difference between the message queue and the job queue is that the job queue has a higher priority than the message queue, which means that promise jobs inside the job queue will be executed before the callbacks inside the message queue.
+
+
+*/
+
+assincronoComPromisse = () => {
+  const funcao3 = () => {
+    print('Função 3: executando e saindo. foi chamada depois da segunda função, mas como não é um callback, ela entra e sai do call stack sem passar pelo message queue');
+  };
+
+  const funcao1 = () => {
+    print('Função 1: chamando segunda função');
+    new Promise((resolve, reject) => {
+      resolve('Função 2: executando e saindo da segunda função');
+    }).then(res => print(res))
+      .catch(err => print(err));
+    
+    print('Função 1: chamando terceira função');
+    funcao3();
+  };
+
+  print("FUNÇÕES ASSÍNCRONAS COM PROMISSES", true);
+  funcao1();  
+  
+};
+assincronoComPromisse();
+
